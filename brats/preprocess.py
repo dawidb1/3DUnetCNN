@@ -2,7 +2,6 @@
 Tools for converting, normalizing, and fixing the brats data.
 """
 
-
 import glob
 import os
 import warnings
@@ -12,7 +11,7 @@ import SimpleITK as sitk
 import numpy as np
 from nipype.interfaces.ants import N4BiasFieldCorrection
 
-from brats.train import config
+from train import config
 
 
 def append_basename(in_file, append):
