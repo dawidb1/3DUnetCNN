@@ -107,7 +107,7 @@ def check_origin(in_file, in_file2):
         sitk.WriteImage(image, in_file)
 
 
-def normalize_image(in_file, out_file, bias_correction=True):
+def normalize_image(in_file, out_file, bias_correction=False):
     if bias_correction:
         correct_bias(in_file, out_file)
     else:
@@ -140,7 +140,7 @@ def convert_brats_folder(in_folder, out_folder, truth_name='seg', no_bias_correc
     check_origin(out_file, get_image(in_folder, config["all_modalities"][0]))
 
 
-def convert_brats_data(brats_folder, out_folder, overwrite=False, no_bias_correction_modalities=("flair",)):
+def convert_brats_data(brats_folder, out_folder, overwrite=False, no_bias_correction_modalities=("t1", "t1ce", "flair", "t2")):
     """
     Preprocesses the BRATS data and writes it to a given output folder. Assumes the original folder structure.
     :param brats_folder: folder containing the original brats data

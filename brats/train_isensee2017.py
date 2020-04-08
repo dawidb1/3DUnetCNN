@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../')
+sys.path.append('../unet3d')
 import os
 import glob
 
@@ -9,7 +12,7 @@ from unet3d.training import load_old_model, train_model
 
 config = dict()
 config["image_shape"] = (128, 128, 128)  # This determines what shape the images will be cropped/resampled to.
-config["patch_shape"] = None  # switch to None to train on the whole image
+config["patch_shape"] = (64,64,64)  # switch to None to train on the whole image
 config["labels"] = (1, 2, 4)  # the label numbers on the input image
 config["n_base_filters"] = 16
 config["n_labels"] = len(config["labels"])
@@ -24,7 +27,7 @@ config["truth_channel"] = config["nb_channels"]
 config["deconvolution"] = True  # if False, will use upsampling instead of deconvolution
 
 config["batch_size"] = 1
-config["validation_batch_size"] = 2
+config["validation_batch_size"] = 1
 config["n_epochs"] = 500  # cutoff the training after this many epochs
 config["patience"] = 10  # learning rate will be reduced after this many epochs if the validation loss is not improving
 config["early_stop"] = 50  # training will be stopped after this many epochs without the validation loss improving
@@ -40,7 +43,7 @@ config["training_patch_start_offset"] = (16, 16, 16)  # randomly offset the firs
 config["skip_blank"] = True  # if True, then patches without any target will be skipped
 
 config["data_file"] = os.path.abspath("brats_data.h5")
-config["model_file"] = os.path.abspath("isensee_2017_model.h5")
+config["model_file"] = os.path.abspath("isensee_2019_new.h5")
 config["training_file"] = os.path.abspath("isensee_training_ids.pkl")
 config["validation_file"] = os.path.abspath("isensee_validation_ids.pkl")
 config["overwrite"] = False  # If True, will previous files. If False, will use previously written files.
