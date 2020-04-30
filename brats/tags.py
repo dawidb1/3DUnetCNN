@@ -1,10 +1,6 @@
 import pydicom
 
 
-class Object(object):
-    pass
-
-
 def add_tags(path, patient, modality):
     ds = pydicom.read_file(path)  # (rtplan.dcm is in the testfiles directory)
 
@@ -20,11 +16,11 @@ def add_tags(path, patient, modality):
 
 def copy_tags(from_path, to_path):
 
-    print(from_path,to_path)
+    print(from_path, to_path)
 
     ds = pydicom.read_file(from_path)
 
-    dicom_data = Object()
+    dicom_data = X('x')
     dicom_data.name = ds[0x10, 0x10].value
     dicom_data.patientId = ds[0x10, 0x20].value
     dicom_data.birth = ds[0x10, 0x30].value
@@ -40,3 +36,14 @@ def copy_tags(from_path, to_path):
     ts[0x08, 0x60].value = "PRED"
 
     ts.save_as(to_path)
+
+
+class X(str):
+    pass
+
+
+if __name__ == "__main__":
+    import os
+    from_path = os.path.abspath("data/test/t1.dcm")
+    to_path = os.path.abspath("data/test/t1.dcm")
+    copy_tags(from_path, to_path)

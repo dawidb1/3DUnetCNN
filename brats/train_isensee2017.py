@@ -1,52 +1,66 @@
+from ..unet3d.training import load_old_model, train_model
+from ..unet3d.model import isensee2017_model
+from ..unet3d.generator import get_training_and_validation_generators
+from ..unet3d.data import write_data_to_file, open_data_file
+import glob
+import os
 import sys
 sys.path.append('../')
 sys.path.append('../unet3d')
-import os
-import glob
-
-from unet3d.data import write_data_to_file, open_data_file
-from unet3d.generator import get_training_and_validation_generators
-from unet3d.model import isensee2017_model
-from unet3d.training import load_old_model, train_model
 
 
 config = dict()
-config["image_shape"] = (128, 128, 128)  # This determines what shape the images will be cropped/resampled to.
-config["patch_shape"] = (64,64,64)  # switch to None to train on the whole image
+# This determines what shape the images will be cropped/resampled to.
+config["image_shape"] = (128, 128, 128)
+# switch to None to train on the whole image
+config["patch_shape"] = (64, 64, 64)
 config["labels"] = (1, 2, 4)  # the label numbers on the input image
 config["n_base_filters"] = 16
 config["n_labels"] = len(config["labels"])
 config["all_modalities"] = ["t1", "t1ce", "flair", "t2"]
-config["training_modalities"] = config["all_modalities"]  # change this if you want to only use some of the modalities
+# change this if you want to only use some of the modalities
+config["training_modalities"] = config["all_modalities"]
 config["nb_channels"] = len(config["training_modalities"])
 if "patch_shape" in config and config["patch_shape"] is not None:
-    config["input_shape"] = tuple([config["nb_channels"]] + list(config["patch_shape"]))
+    config["input_shape"] = tuple(
+        [config["nb_channels"]] + list(config["patch_shape"]))
 else:
-    config["input_shape"] = tuple([config["nb_channels"]] + list(config["image_shape"]))
+    config["input_shape"] = tuple(
+        [config["nb_channels"]] + list(config["image_shape"]))
 config["truth_channel"] = config["nb_channels"]
-config["deconvolution"] = True  # if False, will use upsampling instead of deconvolution
+# if False, will use upsampling instead of deconvolution
+config["deconvolution"] = True
 
 config["batch_size"] = 1
 config["validation_batch_size"] = 1
 config["n_epochs"] = 500  # cutoff the training after this many epochs
-config["patience"] = 10  # learning rate will be reduced after this many epochs if the validation loss is not improving
-config["early_stop"] = 50  # training will be stopped after this many epochs without the validation loss improving
+# learning rate will be reduced after this many epochs if the validation loss is not improving
+config["patience"] = 10
+# training will be stopped after this many epochs without the validation loss improving
+config["early_stop"] = 50
 config["initial_learning_rate"] = 5e-4
-config["learning_rate_drop"] = 0.5  # factor by which the learning rate will be reduced
-config["validation_split"] = 0.8  # portion of the data that will be used for training
+# factor by which the learning rate will be reduced
+config["learning_rate_drop"] = 0.5
+# portion of the data that will be used for training
+config["validation_split"] = 0.8
 config["flip"] = False  # augments the data by randomly flipping an axis during
-config["permute"] = True  # data shape must be a cube. Augments the data by permuting in various directions
+# data shape must be a cube. Augments the data by permuting in various directions
+config["permute"] = True
 config["distort"] = None  # switch to None if you want no distortion
 config["augment"] = config["flip"] or config["distort"]
-config["validation_patch_overlap"] = 0  # if > 0, during training, validation patches will be overlapping
-config["training_patch_start_offset"] = (16, 16, 16)  # randomly offset the first patch index by up to this offset
-config["skip_blank"] = True  # if True, then patches without any target will be skipped
+# if > 0, during training, validation patches will be overlapping
+config["validation_patch_overlap"] = 0
+# randomly offset the first patch index by up to this offset
+config["training_patch_start_offset"] = (16, 16, 16)
+# if True, then patches without any target will be skipped
+config["skip_blank"] = True
 
 config["data_file"] = os.path.abspath("brats_data.h5")
 config["model_file"] = os.path.abspath("isensee_2019_new.h5")
 config["training_file"] = os.path.abspath("isensee_training_ids.pkl")
 config["validation_file"] = os.path.abspath("isensee_validation_ids.pkl")
-config["overwrite"] = False  # If True, will previous files. If False, will use previously written files.
+# If True, will previous files. If False, will use previously written files.
+config["overwrite"] = False
 
 
 def fetch_training_data_files(return_subject_ids=False):
@@ -56,7 +70,8 @@ def fetch_training_data_files(return_subject_ids=False):
         subject_ids.append(os.path.basename(subject_dir))
         subject_files = list()
         for modality in config["training_modalities"] + ["truth"]:
-            subject_files.append(os.path.join(subject_dir, modality + ".nii.gz"))
+            subject_files.append(os.path.join(
+                subject_dir, modality + ".nii.gz"))
         training_data_files.append(tuple(subject_files))
     if return_subject_ids:
         return training_data_files, subject_ids
@@ -67,7 +82,8 @@ def fetch_training_data_files(return_subject_ids=False):
 def main(overwrite=False):
     # convert input images into an hdf5 file
     if overwrite or not os.path.exists(config["data_file"]):
-        training_files, subject_ids = fetch_training_data_files(return_subject_ids=True)
+        training_files, subject_ids = fetch_training_data_files(
+            return_subject_ids=True)
 
         write_data_to_file(training_files, config["data_file"], image_shape=config["image_shape"],
                            subject_ids=subject_ids)

@@ -11,7 +11,7 @@ import SimpleITK as sitk
 import numpy as np
 from nipype.interfaces.ants import N4BiasFieldCorrection
 
-from train import config
+from .train_isensee2017 import config
 
 
 def append_basename(in_file, append):
@@ -128,7 +128,8 @@ def convert_brats_folder(in_folder, out_folder, truth_name='seg', no_bias_correc
 
         out_file = os.path.abspath(os.path.join(out_folder, name + ".nii.gz"))
         perform_bias_correction = no_bias_correction_modalities and name not in no_bias_correction_modalities
-        normalize_image(image_file, out_file, bias_correction=perform_bias_correction)
+        normalize_image(image_file, out_file,
+                        bias_correction=perform_bias_correction)
     # copy the truth file
     try:
         truth_file = get_image(in_folder, truth_name)
