@@ -5,13 +5,31 @@ from keras import backend as K
 from keras.callbacks import ModelCheckpoint, CSVLogger, LearningRateScheduler, ReduceLROnPlateau, EarlyStopping
 from keras.models import load_model
 
-from unet3d.metrics import (dice_coefficient, dice_coefficient_loss, dice_coef, dice_coef_loss,
-                            weighted_dice_coefficient_loss, weighted_dice_coefficient)
-
+from .metrics import (dice_coefficient, dice_coefficient_loss, dice_coef, dice_coef_loss,
+                      weighted_dice_coefficient_loss, weighted_dice_coefficient)
+import tensorflow as tf
+import keras.backend.tensorflow_backend as tfback
 K.common.set_image_dim_ordering('th')
 
 
+def injectKerasBackend():
+    def _get_available_gpus():
+        """Get a list of available gpu devices (formatted as strings).
+
+        # Returns
+            A list of available GPU devices.
+        """
+        #global _LOCAL_DEVICES
+        if tfback._LOCAL_DEVICES is None:
+            devices = tf.config.list_logical_devices()
+            tfback._LOCAL_DEVICES = [x.name for x in devices]
+        return [x for x in tfback._LOCAL_DEVICES if 'device:gpu' in x.lower()]
+
+    tfback._get_available_gpus = _get_available_gpus
+
 # learning rate schedule
+
+
 def step_decay(epoch, initial_lrate, drop, epochs_drop):
     return initial_lrate * math.pow(drop, math.floor((1+epoch)/float(epochs_drop)))
 
@@ -29,22 +47,26 @@ def get_callbacks(model_file, initial_learning_rate=0.0001, learning_rate_drop=0
         callbacks.append(ReduceLROnPlateau(factor=learning_rate_drop, patience=learning_rate_patience,
                                            verbose=verbosity))
     if early_stopping_patience:
-        callbacks.append(EarlyStopping(verbose=verbosity, patience=early_stopping_patience))
+        callbacks.append(EarlyStopping(verbose=verbosity,
+                                       patience=early_stopping_patience))
     return callbacks
 
 
 def load_old_model(model_file):
+    injectKerasBackend()
     print("Loading pre-trained model")
     custom_objects = {'dice_coefficient_loss': dice_coefficient_loss, 'dice_coefficient': dice_coefficient,
                       'dice_coef': dice_coef, 'dice_coef_loss': dice_coef_loss,
                       'weighted_dice_coefficient': weighted_dice_coefficient,
                       'weighted_dice_coefficient_loss': weighted_dice_coefficient_loss}
+
     try:
         from keras_contrib.layers import InstanceNormalization
         custom_objects["InstanceNormalization"] = InstanceNormalization
     except ImportError:
         pass
     try:
+        print(model_file)
         return load_model(model_file, custom_objects=custom_objects)
     except ValueError as error:
         if 'InstanceNormalization' in str(error):
