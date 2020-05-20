@@ -12,7 +12,7 @@ import SimpleITK as sitk
 import numpy as np
 from nipype.interfaces.ants import N4BiasFieldCorrection
 
-from brats.train import config
+from train import config
 
 
 def append_basename(in_file, append):
@@ -141,7 +141,7 @@ def convert_brats_folder(in_folder, out_folder, truth_name='seg', no_bias_correc
     check_origin(out_file, get_image(in_folder, config["all_modalities"][0]))
 
 
-def convert_brats_data(brats_folder, out_folder, overwrite=False, no_bias_correction_modalities=("flair",)):
+def convert_brats_data(brats_folder, out_folder, overwrite=False, no_bias_correction_modalities=("flair","t1", "t2", "t1ce")):
     """
     Preprocesses the BRATS data and writes it to a given output folder. Assumes the original folder structure.
     :param brats_folder: folder containing the original brats data
