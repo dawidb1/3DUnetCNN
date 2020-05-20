@@ -2,7 +2,6 @@
 Tools for converting, normalizing, and fixing the brats data.
 """
 
-
 import glob
 import os
 import warnings
@@ -10,7 +9,6 @@ import shutil
 
 import SimpleITK as sitk
 import numpy as np
-from nipype.interfaces.ants import N4BiasFieldCorrection
 
 from train import config
 
@@ -116,7 +114,7 @@ def normalize_image(in_file, out_file, bias_correction=True):
     return out_file
 
 
-def convert_brats_folder(in_folder, out_folder, truth_name='seg', no_bias_correction_modalities=None):
+def convert_brats_folder(in_folder, out_folder, truth_name='label'):
     for name in config["all_modalities"]:
         try:
             image_file = get_image(in_folder, name)
@@ -128,7 +126,7 @@ def convert_brats_folder(in_folder, out_folder, truth_name='seg', no_bias_correc
                 raise error
 
         out_file = os.path.abspath(os.path.join(out_folder, name + ".nii.gz"))
-        perform_bias_correction = no_bias_correction_modalities and name not in no_bias_correction_modalities
+        perform_bias_correction = False
         normalize_image(image_file, out_file, bias_correction=perform_bias_correction)
     # copy the truth file
     try:
@@ -141,7 +139,7 @@ def convert_brats_folder(in_folder, out_folder, truth_name='seg', no_bias_correc
     check_origin(out_file, get_image(in_folder, config["all_modalities"][0]))
 
 
-def convert_brats_data(brats_folder, out_folder, overwrite=False, no_bias_correction_modalities=("flair","t1", "t2", "t1ce")):
+def convert_brats_data(brats_folder, out_folder, overwrite=False):
     """
     Preprocesses the BRATS data and writes it to a given output folder. Assumes the original folder structure.
     :param brats_folder: folder containing the original brats data
@@ -152,13 +150,11 @@ def convert_brats_data(brats_folder, out_folder, overwrite=False, no_bias_correc
     or tuple.
     :return:
     """
-    for subject_folder in glob.glob(os.path.join(brats_folder, "*", "*")):
-        if os.path.isdir(subject_folder):
+    for subject_folder in glob.glob(os.path.join(brats_folder, "*")):
+         if os.path.isdir(subject_folder):
             subject = os.path.basename(subject_folder)
-            new_subject_folder = os.path.join(out_folder, os.path.basename(os.path.dirname(subject_folder)),
-                                              subject)
+            new_subject_folder = os.path.join(out_folder, subject)
             if not os.path.exists(new_subject_folder) or overwrite:
                 if not os.path.exists(new_subject_folder):
                     os.makedirs(new_subject_folder)
-                convert_brats_folder(subject_folder, new_subject_folder,
-                                     no_bias_correction_modalities=no_bias_correction_modalities)
+                convert_brats_folder(subject_folder, new_subject_folder)
