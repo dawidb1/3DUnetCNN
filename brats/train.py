@@ -1,6 +1,4 @@
 import sys
-sys.path.append('C:/repos/3DUnetCNN')
-
 import os
 import glob
 
