@@ -1,7 +1,7 @@
 import os
 
 # change training config (train_2019, train_liver)
-from train import config
+from train_liver_chaos import config
 from unet3d.prediction import run_validation_cases
 
 
