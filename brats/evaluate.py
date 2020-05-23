@@ -35,10 +35,10 @@ def main():
         subject_ids.append(os.path.basename(case_folder))
         truth_file = os.path.join(case_folder, "truth.nii.gz")
         truth_image = nib.load(truth_file)
-        truth = truth_image.get_data()
+        truth = truth_image.get_fdata()
         prediction_file = os.path.join(case_folder, "prediction.nii.gz")
         prediction_image = nib.load(prediction_file)
-        prediction = prediction_image.get_data()
+        prediction = prediction_image.get_fdata()
         rows.append([dice_coefficient(func(truth), func(prediction))for func in masking_functions])
 
     df = pd.DataFrame.from_records(rows, columns=header, index=subject_ids)
@@ -57,8 +57,8 @@ def main():
     if os.path.exists("./training.log"):
         training_df = pd.read_csv("./training.log").set_index('epoch')
 
-        plt.plot(training_df['loss'].values, label='training loss')
-        plt.plot(training_df['val_loss'].values, label='validation loss')
+        # plt.plot(training_df['loss'].values, label='training loss')
+        plt.plot(training_df['dice_coefficient'].values, label='dice coeficient')
         plt.ylabel('Loss')
         plt.xlabel('Epoch')
         plt.xlim((0, len(training_df.index)))
