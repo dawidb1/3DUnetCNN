@@ -10,7 +10,7 @@ import shutil
 import SimpleITK as sitk
 import numpy as np
 
-from train import config
+from train_2019 import config
 
 
 def append_basename(in_file, append):
@@ -114,7 +114,7 @@ def normalize_image(in_file, out_file, bias_correction=True):
     return out_file
 
 
-def convert_brats_folder(in_folder, out_folder, truth_name='label'):
+def convert_brats_folder(in_folder, out_folder, truth_name='seg'):
     for name in config["all_modalities"]:
         try:
             image_file = get_image(in_folder, name)
@@ -150,7 +150,7 @@ def convert_brats_data(brats_folder, out_folder, overwrite=False):
     or tuple.
     :return:
     """
-    for subject_folder in glob.glob(os.path.join(brats_folder, "*")):
+    for subject_folder in glob.glob(os.path.join(brats_folder, "*", "*")):
          if os.path.isdir(subject_folder):
             subject = os.path.basename(subject_folder)
             new_subject_folder = os.path.join(out_folder, subject)

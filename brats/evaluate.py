@@ -51,7 +51,7 @@ def main():
 
     plt.boxplot(list(scores.values()), labels=list(scores.keys()))
     plt.ylabel("Dice Coefficient")
-    plt.savefig("validation_scores_boxplot.png")
+    plt.savefig("validation_scores_boxplot_2019.png")
     plt.close()
 
     if os.path.exists("./training.log"):
@@ -59,11 +59,11 @@ def main():
 
         # plt.plot(training_df['loss'].values, label='training loss')
         plt.plot(training_df['dice_coefficient'].values, label='dice coeficient')
-        plt.ylabel('Loss')
+        plt.ylabel('Dice Coefficientss')
         plt.xlabel('Epoch')
         plt.xlim((0, len(training_df.index)))
         plt.legend(loc='upper right')
-        plt.savefig('loss_graph.png')
+        plt.savefig('loss_graph_2019.png')
 
 
 if __name__ == "__main__":
